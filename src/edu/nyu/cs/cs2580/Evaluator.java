@@ -19,13 +19,15 @@ import java.util.Scanner;
 class Evaluator {
   public static class DocumentRelevances {
     private Map<Integer, Double> relevances = new HashMap<Integer, Double>();
+    private double _relevenceDocNum = 0.0;
     
     public DocumentRelevances() { }
     
     public void addDocument(int docid, String grade) {
       relevances.put(docid, convertToBinaryRelevance(grade));
+      _relevenceDocNum += convertToBinaryRelevance(grade);
     }
-    
+
     public boolean hasRelevanceForDoc(int docid) {
       return relevances.containsKey(docid);
     }
@@ -41,6 +43,10 @@ class Evaluator {
         return 1.0;
       }
       return 0.0;
+    }
+
+    public double getRelevanceDocNum() {
+      return _relevenceDocNum;
     }
   }
   
@@ -88,13 +94,46 @@ class Evaluator {
       Scanner s = new Scanner(line).useDelimiter("\t");
       final String query = s.next();
       if (!query.equals(currentQuery)) {
-        if (results.size() > 0) {
-          switch (metric) {
+        // if (results.size() > 0) {
+
+        //   switch (metric) {
+        //   case -1:
+        //     evaluateQueryInstructor(currentQuery, results, judgments);
+        //     break;
+        //   case 0:
+        //     evaluateQueryMetric0(currentQuery, results, judgments);
+        //     break;
+        //   case 1:
+        //   case 2:
+        //   case 3:
+        //   case 4:
+        //   case 5:
+        //   case 6:
+        //   default:
+        //     // @CS2580: add your own metric evaluations above, using function
+        //     // names like evaluateQueryMetric0.
+        //     System.err.println("Requested metric not implemented!");
+        //   }
+        //   results.clear();
+        // }
+        currentQuery = query;
+      }
+      results.add(Integer.parseInt(s.next()));
+      s.close();
+    }
+    reader.close();
+    if (results.size() > 0) {
+      // evaluateQueryInstructor(currentQuery, results, judgments);
+      switch (metric) {
           case -1:
             evaluateQueryInstructor(currentQuery, results, judgments);
             break;
           case 0:
+            evaluateQueryMetric0(currentQuery, results, judgments);
+            break;
           case 1:
+            evaluateQueryMetric1(currentQuery, results, judgments);
+            break;
           case 2:
           case 3:
           case 4:
@@ -104,20 +143,79 @@ class Evaluator {
             // @CS2580: add your own metric evaluations above, using function
             // names like evaluateQueryMetric0.
             System.err.println("Requested metric not implemented!");
-          }
-          results.clear();
-        }
-        currentQuery = query;
-      }
-      results.add(Integer.parseInt(s.next()));
-      s.close();
-    }
-    reader.close();
-    if (results.size() > 0) {
-      evaluateQueryInstructor(currentQuery, results, judgments);
     }
   }
+}
   
+  public static void evaluateQueryMetric1(
+      String query, List<Integer> docids,
+      Map<String, DocumentRelevances> judgments) {
+
+    // Recall at 1, 5, 10
+    List<Integer> K = new ArrayList<Integer>();
+    K.add(1);
+    K.add(5);
+    K.add(10);
+
+    int k = 0;
+    double R = 0.0;
+
+    DocumentRelevances relevances = judgments.get(query);
+    double releventDocNum = relevances.getRelevanceDocNum();
+
+    for (int docid : docids) {
+      
+      if (relevances == null) {
+        System.out.println("Query [" + query + "] not found!");
+      } else {
+        if (relevances.hasRelevanceForDoc(docid)) {
+          R += relevances.getRelevanceForDoc(docid);
+        }
+      }
+      k++;
+      if(K.contains(k)) {
+        if(releventDocNum == 0.0){
+          System.err.println(query + "\tRecall@" + Integer.toString(k)+ "\tThere is no relevant document.");
+        }
+        else {
+          System.out.println(query + "\tRecall@" + Integer.toString(k)+ "\t" + Double.toString(R / releventDocNum));
+        }
+      }
+    }
+   
+  }
+  
+  public static void evaluateQueryMetric0(
+      String query, List<Integer> docids,
+      Map<String, DocumentRelevances> judgments) {
+
+    // Precision at 1, 5, 10
+    List<Integer> K = new ArrayList<Integer>();
+    K.add(1);
+    K.add(5);
+    K.add(10);
+
+    double R = 0.0;
+    int k = 0;
+    
+    DocumentRelevances relevances = judgments.get(query);
+    
+    for (int docid : docids) {
+      
+      if (relevances == null) {
+        System.out.println("Query [" + query + "] not found!");
+      } else {
+        if (relevances.hasRelevanceForDoc(docid)) {
+          R += relevances.getRelevanceForDoc(docid);
+        }
+      }
+      k++;
+      if(K.contains(k)) {
+        System.out.println(query + "\tPrecision@" + Integer.toString(k)+ "\t" + Double.toString(R / (double)k));
+      }
+    }
+  }
+
   public static void evaluateQueryInstructor(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
@@ -129,6 +227,7 @@ class Evaluator {
         System.out.println("Query [" + query + "] not found!");
       } else {
         if (relevances.hasRelevanceForDoc(docid)) {
+          System.out.println(docid);
           R += relevances.getRelevanceForDoc(docid);
         }
         ++N;
