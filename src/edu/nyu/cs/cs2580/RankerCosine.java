@@ -89,7 +89,6 @@ public class RankerCosine extends Ranker {
     Vector<ScoredDocument> results = new Vector<ScoredDocument>();
     for (int i = 0; i < all.size() && i < numResults; ++i) {
       results.add(all.get(i));
-      System.out.println("score" + all.get(i).getScore());
     }
     return results;
   }
