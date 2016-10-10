@@ -176,7 +176,7 @@ class Evaluator {
           averagePrecision += R / (double)(i + 1);
         }
       }
-      
+
       if (releventDocNum == 0.0) {
         System.out.println(query + "\tAverage precision\t there is no relevant document in labels.");
         averagePrecision = 0.0;
@@ -193,6 +193,7 @@ class Evaluator {
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
 
+    
 
 
   }
