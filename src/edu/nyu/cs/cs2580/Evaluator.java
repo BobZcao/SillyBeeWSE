@@ -135,6 +135,8 @@ class Evaluator {
             evaluateQueryMetric1(currentQuery, results, judgments);
             break;
           case 2:
+            evaluateQueryMetric2(currentQuery, results, judgments);
+            break;
           case 3:
           case 4:
           case 5:
@@ -146,7 +148,50 @@ class Evaluator {
     }
   }
 }
-  
+  public static void evaluateQueryMetric2(
+      String query, List<Integer> docids,
+      Map<String, DocumentRelevances> judgments) {
+
+    // F-0.5 Measure 
+    double alpha = 0.5;
+    List<Integer> K = new ArrayList<Integer>();
+    K.add(1);
+    K.add(5);
+    K.add(10);
+    int k = 0;
+    double R = 0;
+
+    DocumentRelevances relevances = judgments.get(query);
+    double releventDocNum = relevances.getRelevanceDocNum();
+
+    for (int docid : docids) {
+      
+      if (relevances == null) {
+        System.out.println("Query [" + query + "] not found!");
+      } else {
+        if (relevances.hasRelevanceForDoc(docid)) {
+          R += relevances.getRelevanceForDoc(docid);
+        }
+      }
+      k++;
+      if(K.contains(k)) {
+        if(releventDocNum == 0.0){
+          System.err.println(query + "\tF0.5@" + Integer.toString(k) 
+            + "\tThere is no relevant document in labels.");
+        }
+        else {
+          double FMeasure = evaluateFMeasure(R / (double)k, R / releventDocNum, alpha);
+          System.out.println(query + "\tF0.5@" + Integer.toString(k)+ "\t" + Double.toString(FMeasure));
+        }
+      }
+    }
+
+  }
+
+  private static double evaluateFMeasure(double P, double R, double alpha) {
+    return 1.0 / (alpha * (1.0 / P) + (1.0 - alpha) * (1.0 / R));
+  }
+
   public static void evaluateQueryMetric1(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
@@ -175,7 +220,7 @@ class Evaluator {
       k++;
       if(K.contains(k)) {
         if(releventDocNum == 0.0){
-          System.err.println(query + "\tRecall@" + Integer.toString(k)+ "\tThere is no relevant document.");
+          System.err.println(query + "\tRecall@" + Integer.toString(k)+ "\tThere is no relevant document in labels.");
         }
         else {
           System.out.println(query + "\tRecall@" + Integer.toString(k)+ "\t" + Double.toString(R / releventDocNum));
