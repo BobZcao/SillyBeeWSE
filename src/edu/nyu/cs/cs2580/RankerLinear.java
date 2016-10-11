@@ -8,7 +8,7 @@ import edu.nyu.cs.cs2580.SearchEngine.Options;
 /**
  * @CS2580: Use this template to implement the linear ranker for HW1. You must
  * use the provided _betaXYZ for combining the signals.
- * 
+ *
  * @author congyu
  * @author fdiaz
  */
@@ -17,6 +17,10 @@ public class RankerLinear extends Ranker {
   private float _betaQl = 1.0f;
   private float _betaPhrase = 1.0f;
   private float _betaNumviews = 1.0f;
+  private RankerCosine cos;
+  private RankerQl ql;
+  private RankerPhrase phrase;
+  private RankerNumviews numviews;
 
   public RankerLinear(Options options,
       CgiArguments arguments, Indexer indexer) {
@@ -26,6 +30,11 @@ public class RankerLinear extends Ranker {
     _betaQl = options._betaValues.get("beta_ql");
     _betaPhrase = options._betaValues.get("beta_phrase");
     _betaNumviews = options._betaValues.get("beta_numviews");
+    //create four rankers and work locally
+    cos = RankerCosine(options,arguments,indexer);
+    ql = RankerQl(options,arguments,indexer);
+    phrase = RankerPhrase(options,arguments,indexer);
+    numviews = RankerNumvies(options,arguments,indexer);
   }
 
   @Override
@@ -35,8 +44,26 @@ public class RankerLinear extends Ranker {
         ", ql=" + Float.toString(_betaQl) +
         ", phrase=" + Float.toString(_betaPhrase) +
         ", numviews=" + Float.toString(_betaNumviews));
+        //create a vector and stores all the document that are scroed by the query.
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
-    // @CS2580: fill in your code here.
-    return all;
+    //run and get Vector<ScoredDocument> for each ranker.runQuery;
+
+    for (int i = 0; i < _indexer.numDocs(); ++i) {
+          //score and store each document.
+      all.add(scoreDocument(query, i));
+    }
+      Collections.sort(all, Collections.reverseOrder());
+      Vector<ScoredDocument> results = new Vector<ScoredDocument>();
+      for (int i = 0; i < all.size() && i < numResults; ++i) {
+        results.add(all.get(i));
+      }
+
+      return results;
   }
+
+  private ScoredDocument scoreDocument(Query query, int did){
+    score =
+  }
+
+
 }

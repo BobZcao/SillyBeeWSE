@@ -12,28 +12,28 @@ import java.util.Scanner;
 
 /**
  * Evaluator for HW1.
- * 
+ *
  * @author fdiaz
  * @author congyu
  */
 class Evaluator {
   public static class DocumentRelevances {
     private Map<Integer, Double> relevances = new HashMap<Integer, Double>();
-    
+
     public DocumentRelevances() { }
-    
+
     public void addDocument(int docid, String grade) {
       relevances.put(docid, convertToBinaryRelevance(grade));
     }
-    
+
     public boolean hasRelevanceForDoc(int docid) {
       return relevances.containsKey(docid);
     }
-    
+
     public double getRelevanceForDoc(int docid) {
       return relevances.get(docid);
     }
-    
+
     private static double convertToBinaryRelevance(String grade) {
       if (grade.equalsIgnoreCase("Perfect") ||
           grade.equalsIgnoreCase("Excellent") ||
@@ -43,7 +43,7 @@ class Evaluator {
       return 0.0;
     }
   }
-  
+
   /**
    * Usage: java -cp src edu.nyu.cs.cs2580.Evaluator [labels] [metric_id]
    */
@@ -117,7 +117,7 @@ class Evaluator {
       evaluateQueryInstructor(currentQuery, results, judgments);
     }
   }
-  
+
   public static void evaluateQueryInstructor(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
