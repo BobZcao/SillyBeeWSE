@@ -2,10 +2,13 @@ package edu.nyu.cs.cs2580;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpServer;
@@ -118,6 +121,7 @@ public class SearchEngine {
     NONE,
     INDEX,
     SERVE,
+    LOCAL,
   };
   public static Mode MODE = Mode.NONE;
 
@@ -141,7 +145,7 @@ public class SearchEngine {
         OPTIONS = new Options(value);
       }
     }
-    Check(MODE == Mode.SERVE || MODE == Mode.INDEX,
+    Check(MODE == Mode.SERVE || MODE == Mode.INDEX || MODE == Mode.LOCAL,
         "Must provide a valid mode: serve or index!");
     Check(MODE != Mode.SERVE || PORT != -1,
         "Must provide a valid port number (258XX) in serve mode!");
@@ -174,6 +178,79 @@ public class SearchEngine {
     System.out.println(
         "Listening on port: " + Integer.toString(SearchEngine.PORT));
   }
+
+  private static String typeToString(QueryHandler.CgiArguments.RankerType rankerType) {
+    String rankerName = "";
+    switch (rankerType) {
+      case COSINE:
+        rankerName = "vsm";
+        break;
+      case QL:
+        rankerName = "ql";
+        break;
+      case PHRASE:
+        rankerName = "phrase";
+        break;
+      case NUMVIEWS:
+        rankerName = "numviews";
+        break;
+      case LINEAR:
+        rankerName = "linear";
+        break;
+      default:
+        break;
+    }
+    return rankerName;
+  }
+
+  private static void startProcessing() throws IOException, ClassNotFoundException{
+    // Create the handler and its associated indexer.
+    Indexer indexer = Indexer.Factory.getIndexerByOption(SearchEngine.OPTIONS);
+    Check(indexer != null,
+        "Indexer " + SearchEngine.OPTIONS._indexerType + " not found!");
+    indexer.loadIndex();
+
+    for (QueryHandler.CgiArguments.RankerType rankerType : QueryHandler.CgiArguments.RankerType.values()) {
+      if (rankerType != QueryHandler.CgiArguments.RankerType.NONE
+        && rankerType != QueryHandler.CgiArguments.RankerType.FULLSCAN){
+        // Create the ranker
+        QueryHandler.CgiArguments arguments = new QueryHandler.CgiArguments("");
+        arguments._rankerType = rankerType;
+
+        Ranker ranker = Ranker.Factory.getRankerByArguments(
+            arguments, SearchEngine.OPTIONS, indexer);
+        Check(ranker != null,
+              "Ranker " + rankerType + " is not valid!");
+        if(typeToString(rankerType) == "")System.out.println(rankerType);
+        String fileName = "hw1.1-" + typeToString(rankerType) + ".tsv";
+        processQueryForRanker(ranker, indexer.numDocs(), fileName);
+      }
+    }
+  }
+
+  private static void processQueryForRanker(Ranker ranker, int numResults, String fileName) throws IOException {
+    String queryFile = "data/queries.tsv";
+    String resultFile = fileName;
+    String line = null;
+    BufferedReader reader = new BufferedReader(new FileReader(queryFile));
+    BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile));
+    while ((line = reader.readLine()) != null) {
+       // Processing the query.
+      Query processedQuery = new Query(line);
+      processedQuery.processQuery();
+
+      // Ranking.
+      Vector<ScoredDocument> scoredDocs =
+          ranker.runQuery(processedQuery, numResults);
+      for (ScoredDocument doc : scoredDocs) {
+        writer.write(doc.asTextResult());
+        writer.write("\n");
+      }
+    }
+    reader.close();
+    writer.close();
+  }
+
   
   public static void main(String[] args) {
     try {
@@ -184,6 +261,9 @@ public class SearchEngine {
         break;
       case SERVE:
         startServing();
+        break;
+      case LOCAL:
+        startProcessing();
         break;
       default:
         Check(false, "Wrong mode for SearchEngine!");
