@@ -4,11 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Evaluator for HW1.
@@ -193,7 +189,40 @@ class Evaluator {
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
 
+    Double[] V = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0};
+    DocumentRelevances relevances = judgments.get(query);
+    if(relevances == null){
+      System.out.println("Query [" + query + "] not found!");
+    }
+    else{
+      double relevantDocNum = relevances.getRelevanceDocNum();
 
+      for (double v : V){
+        double R = relevantDocNum * v;
+        double k = calculateKValue(query, docids, judgments, R);
+        double precision = R/k;
+        System.out.println(query + "\tPrecision@recall" + Double.toString(v) + "\t" + Double.toString(precision));
+      }
+    }
+
+  }
+
+  private static Double calculateKValue(String query, List<Integer> docids,
+                                        Map<String, DocumentRelevances> judgements, Double R){
+
+    DocumentRelevances relevances = judgements.get(query);
+    Double k = 0.0;
+
+    for(Integer id : docids){
+      if(R <= 0.0){
+        return k;
+      }
+      if(relevances.hasRelevanceForDoc(id)){
+        R -= relevances.getRelevanceForDoc(id);
+      }
+      k += 1.0;
+    }
+    return k;
 
   }
 
