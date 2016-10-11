@@ -19,7 +19,7 @@ import edu.nyu.cs.cs2580.SearchEngine.Options;
 
 /**
  * Instructor's implementation of a simple full scan Indexer, used in HW1.
- * 
+ *
  * @author fdiaz
  * @author congyu
  */
@@ -45,7 +45,7 @@ class IndexerFullScan extends Indexer implements Serializable {
 
   // Provided for serialization
   public IndexerFullScan() { }
-  
+
   // The real constructor
   public IndexerFullScan(Options option) {
     super(option);
@@ -53,10 +53,10 @@ class IndexerFullScan extends Indexer implements Serializable {
   }
 
   ///// Construction related functions.
-  
+
   /**
    * Constructs the index from the corpus file.
-   * 
+   *
    * @throws IOException
    */
   @Override
@@ -118,7 +118,7 @@ class IndexerFullScan extends Indexer implements Serializable {
       _termDocFrequency.put(idx, _termDocFrequency.get(idx) + 1);
     }
   }
-  
+
   /**
    * Tokenize {@code content} into terms, translate terms into their integer
    * representation, store the integers in {@code tokens}.
@@ -143,7 +143,7 @@ class IndexerFullScan extends Indexer implements Serializable {
     }
     return;
   }
-  
+
   /**
    * Update the corpus statistics with {@code tokens}. Using {@code uniques} to
    * bridge between different token vectors.
@@ -162,12 +162,12 @@ class IndexerFullScan extends Indexer implements Serializable {
 
   /**
    * Loads the index from the index file.
-   * 
+   *
    * N.B. For this particular implementation, loading the index from the simple
    * serialization format is in fact slower than constructing the index from
    * scratch. For the more efficient indices, loading should be much faster
    * than constructing.
-   * 
+   *
    * @throws IOException, ClassNotFoundException
    */
   @Override

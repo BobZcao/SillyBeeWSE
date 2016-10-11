@@ -10,7 +10,7 @@ import edu.nyu.cs.cs2580.ScoredDocument;
 /**
  * This Ranker makes a full scan over all the documents in the index. It is the
  * instructors' implementation of the Ranker in HW1.
- * 
+ *
  * @author fdiaz
  * @author congyu
  */
@@ -23,11 +23,15 @@ class RankerFullScan extends Ranker {
   }
 
   @Override
-  public Vector<ScoredDocument> runQuery(Query query, int numResults) {    
+  public Vector<ScoredDocument> runQuery(Query query, int numResults) {
+    //create a vector and stores all the document that are scroed by the query.
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
+
     for (int i = 0; i < _indexer.numDocs(); ++i) {
+      //score and store each document.
       all.add(scoreDocument(query, i));
     }
+
     Collections.sort(all, Collections.reverseOrder());
     Vector<ScoredDocument> results = new Vector<ScoredDocument>();
     for (int i = 0; i < all.size() && i < numResults; ++i) {
@@ -35,7 +39,7 @@ class RankerFullScan extends Ranker {
     }
     return results;
   }
-
+  //did is the index of the document.
   private ScoredDocument scoreDocument(Query query, int did) {
     // Process the raw query into tokens.
     query.processQuery();
@@ -47,6 +51,7 @@ class RankerFullScan extends Ranker {
     // Score the document. Here we have provided a very simple ranking model,
     // where a document is scored 1.0 if it gets hit by at least one query term.
     double score = 0.0;
+    //compare document tokens with query tokens
     for (String docToken : docTokens) {
       for (String queryToken : query._tokens) {
         if (docToken.equals(queryToken)) {
