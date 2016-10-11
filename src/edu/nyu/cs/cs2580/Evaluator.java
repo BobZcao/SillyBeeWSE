@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,31 +158,30 @@ class Evaluator {
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
 
-    // Average precision, using top 10 document retrieved
-    int K = 10;
+    // Average Precision, iterate through all document
     DocumentRelevances relevances = judgments.get(query);
     double averagePrecision = 0.0;
-    double R = 0.0;
+    double R = 0.0; 
+    int i = 1;
 
     if (relevances == null) {
       System.out.println("Query [" + query + "] not found!");
     } else {
-      double releventDocNum = relevances.getRelevanceDocNum();
-
-      for (int i = 0; i < K; ++i) {
-      int docid = docids.get(i);
-      if (relevances.hasRelevanceForDoc(docid) 
-        && relevances.getRelevanceForDoc(docid) != 0.0) {
-          R += relevances.getRelevanceForDoc(docid);
-          averagePrecision += R / (double)(i + 1);
-        }
+      
+      for (int docid : docids) {
+        if (relevances.hasRelevanceForDoc(docid) 
+          && relevances.getRelevanceForDoc(docid) != 0.0) {
+            R += relevances.getRelevanceForDoc(docid);
+            averagePrecision += R / (double)(i);
+          }
+        i++;
       }
 
-      if (releventDocNum == 0.0) {
+      if (R == 0.0) {
         System.out.println(query + "\tAverage precision\t there is no relevant document in labels.");
         averagePrecision = 0.0;
       } else {
-        averagePrecision /= releventDocNum;
+        averagePrecision /= R;
         System.out.println(query + "\tAverage precision\t" + Double.toString(averagePrecision));
       }
     }
@@ -192,9 +192,62 @@ class Evaluator {
   public static void evaluateQueryMetric3(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
-
     
+    DocumentRelevances relevances = judgments.get(query);
+    TreeMap<Double, Double> recall_precision = new TreeMap<Double, Double>();
+    double R = 0.0;
+    double precision = 0.0;
+    double recall = 0.0;
+    int i = 1;
 
+    if (relevances == null) {
+      System.out.println("Query [" + query + "] not found!");
+    } else {
+      // Calculate precision and recall value
+      double releventDocNum = relevances.getRelevanceDocNum();
+      if (releventDocNum == 0.0) {
+        System.out.println("There is no relevant documents in label");
+      } else {
+        for (int docid : docids) {
+          if (relevances.hasRelevanceForDoc(docid)) {
+              R += relevances.getRelevanceForDoc(docid);
+            }
+          recall = R / releventDocNum;
+          precision = R / i;
+          if(recall_precision.containsKey(recall)){
+            if(precision > recall_precision.get(recall)) {
+              recall_precision.put(recall, precision);
+            }
+          } else {
+            recall_precision.put(recall, precision);
+          }
+          i++;
+        }
+
+        // Interpolation of recall value 
+        double precision_stdcell = 0.0;
+        
+        for (int j = 0; j <= 10; j++) {
+          double r = j / 10.0;
+          if(recall_precision.containsKey(r)) {
+            precision_stdcell = recall_precision.get(r);
+          } else {
+            double rightSlotPrecision = 0.0;
+            double leftSlotPrecision = 0.0;
+            if (recall_precision.ceilingKey(r) != null) {
+              rightSlotPrecision = recall_precision.get(recall_precision.ceilingKey(r));
+            }
+            if (recall_precision.floorKey(r) != null) {
+              leftSlotPrecision = recall_precision.get(recall_precision.floorKey(r));
+            }
+            precision_stdcell = leftSlotPrecision > rightSlotPrecision ? leftSlotPrecision : rightSlotPrecision;
+          } 
+          
+          System.out.println(query + "\tPrecision@Recall@" + Double.toString(r) + "\t" + precision_stdcell);
+          
+        }
+      }
+    }
 
   }
 

@@ -57,11 +57,9 @@ public class RankerQl extends Ranker {
     }
 
     getDocTermFrequency(did, termFrequencyMap);
-    System.out.println("id" + did + "totalfreq" + totalTermFrequency + "\tlength" + documentLength);
     for (Map.Entry<String, Integer> entry : termFrequencyMap.entrySet()) {
       int corpusTermFrequency = _indexer.corpusTermFrequency(entry.getKey());
       int documentTermFrequency = entry.getValue();
-      System.out.println("id" + did + entry.getKey() + "\t" + documentTermFrequency + "\t" + corpusTermFrequency);
       score += Math.log(((1.0 - lamda) * ((double)documentTermFrequency / (double)documentLength) / (lamda * ((double)corpusTermFrequency / (double)totalTermFrequency))) + 1.0);
     }
   
