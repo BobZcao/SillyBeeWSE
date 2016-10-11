@@ -96,12 +96,46 @@ class QueryHandler implements HttpHandler {
 
   private void respondWithMsg(HttpExchange exchange, final String message)
       throws IOException {
+    respondWithMsg(exchange, message, CgiArguments.OutputFormat.TEXT);
+  }
+
+  private void respondWithMsg(HttpExchange exchange, final String message, CgiArguments.OutputFormat outputFormat)
+      throws IOException {
     Headers responseHeaders = exchange.getResponseHeaders();
-    responseHeaders.set("Content-Type", "text/plain");
+    switch (outputFormat) {
+      case TEXT:
+        responseHeaders.set("Content-Type", "text/plain");
+        break;
+      case HTML:
+        responseHeaders.set("Content-Type", "text/html");
+        break;
+      default:
+        responseHeaders.set("Content-Type", "text/plain");
+        break;
+    }
     exchange.sendResponseHeaders(200, 0); // arbitrary number of bytes
     OutputStream responseBody = exchange.getResponseBody();
     responseBody.write(message.getBytes());
     responseBody.close();
+  }
+
+  private void constructHTMLOutput(
+      final Vector<ScoredDocument> docs, StringBuffer response) {
+    response.append("<html><link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>")
+      .append("<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js'></script>")
+      .append("<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>");
+    if(docs.size() > 0) {
+      response.append("<div class='container'><table class='table table-striped'>");
+      response.append("<h2>Results</h2>");
+      response.append("<thead><tr><th>Query</th><th>DocumentID</th><th>Title</th><th>Score</th></tr></thead>");
+      for (ScoredDocument doc : docs) {
+        response.append(doc.asHtmlResult());
+      }
+      response.append("</tbody></table></div>");
+    } else {
+      response.append("<p>No result returned!</p>");
+    }
+    response.append("</html>");
   }
 
   private void constructTextOutput(
@@ -165,12 +199,12 @@ class QueryHandler implements HttpHandler {
       constructTextOutput(scoredDocs, response);
       break;
     case HTML:
-      // @CS2580: Plug in your HTML output
+      constructHTMLOutput(scoredDocs, response);
       break;
     default:
       // nothing
     }
-    respondWithMsg(exchange, response.toString());
+    respondWithMsg(exchange, response.toString(), cgiArgs._outputFormat);
     System.out.println("Finished query: " + cgiArgs._query);
   }
 }

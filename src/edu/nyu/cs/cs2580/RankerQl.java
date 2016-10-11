@@ -37,8 +37,6 @@ public class RankerQl extends Ranker {
   }
 
   private ScoredDocument scoreDocument(Query query, int did) {
-    // Process the raw query into tokens.
-    query.processQuery();
 
     // Use Jelinek-Mercer smoothing with lamda 0.5
     double lamda = 0.5;

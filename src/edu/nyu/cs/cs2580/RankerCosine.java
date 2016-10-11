@@ -49,10 +49,11 @@ public class RankerCosine extends Ranker {
 
     // Compute tf-idf vector
     double normalizeFactor = 0.0;
+    double totalWordNum = docTokens.size();
     for (Map.Entry<String, Double> entry : docVector.entrySet()) {
       double IDF = getTermIDF(entry.getKey());
-      normalizeFactor += Math.pow((entry.getValue() * IDF), 2);
-      entry.setValue(entry.getValue() * IDF);
+      entry.setValue(entry.getValue() / totalWordNum * IDF);
+      normalizeFactor += Math.pow(entry.getValue(), 2);
     }
     normalizeFactor = Math.sqrt(normalizeFactor);
 
@@ -64,9 +65,6 @@ public class RankerCosine extends Ranker {
 
   @Override
   public Vector<ScoredDocument> runQuery(Query query, int numResults) {
-    
-    // Process the raw query into tokens.
-    query.processQuery();
 
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
 
