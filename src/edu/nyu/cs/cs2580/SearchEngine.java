@@ -230,7 +230,7 @@ public class SearchEngine {
 
   private static void processQueryForRanker(Ranker ranker, int numResults, String fileName) throws IOException {
     String queryFile = "data/queries.tsv";
-    String resultFile = fileName;
+    String resultFile = "data/" + fileName;
     String line = null;
     BufferedReader reader = new BufferedReader(new FileReader(queryFile));
     BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile));
