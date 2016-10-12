@@ -1,7 +1,7 @@
 package edu.nyu.cs.cs2580;
 
 import java.util.Vector;
-
+import java.util.Collections;
 import edu.nyu.cs.cs2580.QueryHandler.CgiArguments;
 import edu.nyu.cs.cs2580.SearchEngine.Options;
 
@@ -52,4 +52,4 @@ public class RankerNumviews extends Ranker {
   }
 
   }
-}
+

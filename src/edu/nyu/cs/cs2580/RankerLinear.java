@@ -1,5 +1,6 @@
 package edu.nyu.cs.cs2580;
 
+import java.util.Collections;
 import java.util.Vector;
 
 import edu.nyu.cs.cs2580.QueryHandler.CgiArguments;
@@ -31,10 +32,10 @@ public class RankerLinear extends Ranker {
     _betaPhrase = options._betaValues.get("beta_phrase");
     _betaNumviews = options._betaValues.get("beta_numviews");
     //create four rankers and work locally
-    cos = RankerCosine(options,arguments,indexer);
-    ql = RankerQl(options,arguments,indexer);
-    phrase = RankerPhrase(options,arguments,indexer);
-    numviews = RankerNumvies(options,arguments,indexer);
+    cos = new RankerCosine(options,arguments,indexer);
+    ql = new RankerQl(options,arguments,indexer);
+    phrase = new RankerPhrase(options,arguments,indexer);
+    numviews = new RankerNumviews(options,arguments,indexer);
   }
 
   @Override
@@ -50,7 +51,7 @@ public class RankerLinear extends Ranker {
 
     for (int i = 0; i < _indexer.numDocs(); ++i) {
           //score and store each document.
-      all.add(scoreDocument(query, i));
+      //all.add(scoreDocument(query, i));
     }
       Collections.sort(all, Collections.reverseOrder());
       Vector<ScoredDocument> results = new Vector<ScoredDocument>();
@@ -61,9 +62,9 @@ public class RankerLinear extends Ranker {
       return results;
   }
 
-  private ScoredDocument scoreDocument(Query query, int did){
-    score =
-  }
+//  private ScoredDocument scoreDocument(Query query, int did){
+//    score =
+//  }
 
 
 }

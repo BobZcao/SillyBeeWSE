@@ -1,7 +1,7 @@
 package edu.nyu.cs.cs2580;
 
 import java.util.Vector;
-
+import java.util.Collections;
 import edu.nyu.cs.cs2580.QueryHandler.CgiArguments;
 import edu.nyu.cs.cs2580.SearchEngine.Options;
 
@@ -25,7 +25,7 @@ public class RankerPhrase extends Ranker {
     for (int i = 0; i < _indexer.numDocs(); ++i){
       all.add(scoredDocument(query, i));
     }
-    Collections.sort(all, Collections.revereOrder());
+    Collections.sort(all, Collections.reverseOrder());
     Vector<ScoredDocument> results = new Vector<ScoredDocument>();
     for(int i = 0; i < all.size() && i < numResults; ++i){
       results.add(all.get(i));
@@ -34,24 +34,26 @@ public class RankerPhrase extends Ranker {
   }
 
   private ScoredDocument scoredDocument(Query query, int did){
-    //process the query into tokens, which is terms
+    // Process the raw query into tokens.
     query.processQuery();
 
-    //Get the document tokens.
+    // Get the document tokens.
     Document doc = _indexer.getDoc(did);
     Vector<String> docTokens = ((DocumentFull) doc).getConvertedTitleTokens();
 
-    // Score the document.
-    // This ranker count the number of query term occurrences in the document.
+
     double score = 0.0;
-    for(String docToken : docTokens){
-      for(String queryToken : query._tokens){
-        if(doctoken.equals(queryToken)){
-          score ++;
+
+    //compare document tokens with query tokens
+    for (String docToken : docTokens) {
+      for (String queryToken : query._tokens) {
+        if (docToken.equals(queryToken)) {
+          score = score + 1.0;
         }
       }
+
     }
-    return new ScorecdDocument(query._query,doc,score);
+    return new ScoredDocument(query._query, doc, score);
   }
 
 }

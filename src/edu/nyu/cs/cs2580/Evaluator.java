@@ -20,30 +20,53 @@ import java.util.Scanner;
 class Evaluator {
   public static class DocumentRelevances {
     private Map<Integer, Double> relevances = new HashMap<Integer, Double>();
+    private Map<Integer, Double> gains = new HashMap<>();
     private double _relevenceDocNum = 0.0;
-    
+
+
     public DocumentRelevances() { }
-    
+
     public void addDocument(int docid, String grade) {
       relevances.put(docid, convertToBinaryRelevance(grade));
+      gains.put(docid, convertToGains(grade));
       _relevenceDocNum += convertToBinaryRelevance(grade);
     }
 
     public boolean hasRelevanceForDoc(int docid) {
       return relevances.containsKey(docid);
     }
-    
+
     public double getRelevanceForDoc(int docid) {
       return relevances.get(docid);
     }
-    
+
+    public double getGainForDoc(int docid) {return gains.get(docid);}
+
     private static double convertToBinaryRelevance(String grade) {
       if (grade.equalsIgnoreCase("Perfect") ||
-          grade.equalsIgnoreCase("Excellent") ||
-          grade.equalsIgnoreCase("Good")) {
+              grade.equalsIgnoreCase("Excellent") ||
+              grade.equalsIgnoreCase("Good")) {
         return 1.0;
       }
       return 0.0;
+    }
+
+    private static double convertToGains(String grade){
+      if (grade.equalsIgnoreCase("Perfect")){
+        return 10.0;
+      }
+      else if (grade.equalsIgnoreCase("Excellent")){
+        return 7.0;
+      }
+      else if (grade.equalsIgnoreCase("Good")){
+        return 5.0;
+      }
+      else if (grade.equalsIgnoreCase("Fair")){
+        return 1.0;
+      }
+      else {
+        return 0.0;
+      }
     }
 
     public double getRelevanceDocNum() {
@@ -145,7 +168,11 @@ class Evaluator {
             evaluateQueryMetric4(currentQuery, results, judgments);
             break;
           case 5:
+            evaluateQueryMetric5(currentQuery, results, judgments);
+            break;
           case 6:
+            evaluateQueryMetric6(currentQuery, results, judgments);
+            break;
           default:
             // @CS2580: add your own metric evaluations above, using function
             // names like evaluateQueryMetric0.
@@ -363,4 +390,53 @@ class Evaluator {
     }
     System.out.println(query + "\t" + Double.toString(R / N));
   }
+
+  public static void evaluateQueryMetric6( String query, List<Integer> docids,
+                                           Map<String, DocumentRelevances> judgements){
+
+    DocumentRelevances relevances = judgements.get(query);
+    if(relevances == null){
+      System.out.println("Query [" + query + "] not found!");
+      return ;
+    }
+    for (int i=0; i<docids.size(); i++){
+      Integer id = docids.get(i);
+      if(relevances.hasRelevanceForDoc(id) && relevances.getRelevanceForDoc(id)>0){
+        Double result = 1.0/Double.valueOf(i+1);
+        System.out.println(query + "\tReciprocal rank\t" + Double.toString(result));
+        return ;
+      }
+    }
+
+  }
+
+  public static void evaluateQueryMetric5(String query, List<Integer> docids,
+                                          Map<String, DocumentRelevances> judgements){
+
+    int[] K = {1, 5 ,10};
+    DocumentRelevances relevances = judgements.get(query);
+
+    if(relevances == null){
+      System.out.println("Query [" + query + "] not found!");
+      return ;
+    }
+    for(int k: K) {
+      Double score = 0.0;
+      for (int i = 1; i <= k; i++) {
+        Integer id = docids.get(i-1);
+        if(relevances.hasRelevanceForDoc(id)){
+          Double gain = relevances.getGainForDoc(id);
+          score += gain/(Math.log(i+1)/Math.log(2.0));
+        }
+        //take it as 'bad'
+        else{
+          continue;
+        }
+      }
+      System.out.println(query + "\tNDCG@" + Integer.toString(k) + "\t" + Double.toString(score));
+    }
+
+
+  }
+
 }
