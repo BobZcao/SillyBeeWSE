@@ -1,5 +1,5 @@
 package edu.nyu.cs.cs2580;
-
+import java.util.Collections;
 /**
  * Document with score.
  *
@@ -16,7 +16,14 @@ class ScoredDocument implements Comparable<ScoredDocument> {
     _doc = doc;
     _score = score;
   }
-
+  //return the linear scoredDocument
+  public ScoredDocument(String query, Document doc,
+   ScoredDocument[] fourScoredDocument, float[] _betaArray ){
+      _query = query;
+      _doc = doc;
+      _score = _betaArray[0] * fourScoredDocument[0]._score + _betaArray[1] * fourScoredDocument[1]._score+
+      _betaArray[2] * fourScoredDocument[2]._score + _betaArray[3] * fourScoredDocument[3]._score;
+  }
   public String asTextResult() {
     StringBuffer buf = new StringBuffer();
     buf.append(_query).append("\t");
