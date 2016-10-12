@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -224,27 +225,31 @@ class Evaluator {
           i++;
         }
 
+        // Restore maximum precision value of cells that has larger recall value
+        TreeMap<Double, Double> reversedMap = new TreeMap<Double,Double>(Collections.reverseOrder());
+        reversedMap.putAll(recall_precision);
+        double rightMax = 0.0;
+        for(Map.Entry<Double,Double> entry : reversedMap.entrySet()) {
+          if (entry.getValue() > rightMax) {
+            rightMax = entry.getValue();
+          } else {
+            reversedMap.put(entry.getKey(), rightMax);
+          }
+        }
+
         // Interpolation of recall value 
         double precision_stdcell = 0.0;
-        
         for (int j = 0; j <= 10; j++) {
           double r = j / 10.0;
-          if(recall_precision.containsKey(r)) {
-            precision_stdcell = recall_precision.get(r);
+          Map.Entry<Double,Double> floorEntry = reversedMap.floorEntry(r);
+          if (floorEntry == null) {
+            if(reversedMap.containsKey(r)) {
+                precision_stdcell = reversedMap.get(r);
+            }
           } else {
-            double rightSlotPrecision = 0.0;
-            double leftSlotPrecision = 0.0;
-            if (recall_precision.ceilingKey(r) != null) {
-              rightSlotPrecision = recall_precision.get(recall_precision.ceilingKey(r));
-            }
-            if (recall_precision.floorKey(r) != null) {
-              leftSlotPrecision = recall_precision.get(recall_precision.floorKey(r));
-            }
-            precision_stdcell = leftSlotPrecision > rightSlotPrecision ? leftSlotPrecision : rightSlotPrecision;
-          } 
-          
+            precision_stdcell = floorEntry.getValue();
+          }
           System.out.println(query + "\tPrecision@Recall@" + Double.toString(r) + "\t" + precision_stdcell);
-          
         }
       }
     }
