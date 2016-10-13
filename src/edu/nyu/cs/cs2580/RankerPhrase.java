@@ -23,7 +23,7 @@ public class RankerPhrase extends Ranker {
   public Vector<ScoredDocument> runQuery(Query query, int numResults) {
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
     for (int i = 0; i < _indexer.numDocs(); ++i){
-      all.add(scoredDocument(query, i));
+      all.add(scoreDocument(query, i));
     }
     Collections.sort(all, Collections.reverseOrder());
     Vector<ScoredDocument> results = new Vector<ScoredDocument>();
@@ -33,7 +33,12 @@ public class RankerPhrase extends Ranker {
     return results;
   }
 
-  private ScoredDocument scoredDocument(Query query, int did){
+  //helper mthod for phrase ranker to do single document query
+  public ScoredDocument runQuery_phrase_sd(Query query, int indexNumber){
+    return scoreDocument(query, indexNumber);
+  }
+
+  private ScoredDocument scoreDocument(Query query, int did){
     // Process the raw query into tokens.
     query.processQuery();
 
@@ -51,7 +56,6 @@ public class RankerPhrase extends Ranker {
           score = score + 1.0;
         }
       }
-
     }
     return new ScoredDocument(query._query, doc, score);
   }

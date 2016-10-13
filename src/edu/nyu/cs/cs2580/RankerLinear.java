@@ -18,6 +18,7 @@ public class RankerLinear extends Ranker {
   private float _betaQl = 1.0f;
   private float _betaPhrase = 1.0f;
   private float _betaNumviews = 1.0f;
+
   private RankerCosine cos;
   private RankerQl ql;
   private RankerPhrase phrase;
@@ -38,33 +39,46 @@ public class RankerLinear extends Ranker {
     numviews = new RankerNumviews(options,arguments,indexer);
   }
 
+
   @Override
   public Vector<ScoredDocument> runQuery(Query query, int numResults) {
+    //load four _betaXYZ for combining signals
+    float[] _betaArray = {_betaCosine,_betaQl,_betaPhrase,_betaNumviews};
+    //load four scored document from four rankers each time when scoring a document
+    ScoredDocument[] fourScoredDocument = new ScoredDocument[4];
     System.out.println("  with beta values" +
         ": cosine=" + Float.toString(_betaCosine) +
         ", ql=" + Float.toString(_betaQl) +
         ", phrase=" + Float.toString(_betaPhrase) +
         ", numviews=" + Float.toString(_betaNumviews));
-        //create a vector and stores all the document that are scroed by the query.
+    //create a vector and stores all the document that are scroed by the query.
     Vector<ScoredDocument> all = new Vector<ScoredDocument>();
-    //run and get Vector<ScoredDocument> for each ranker.runQuery;
 
     for (int i = 0; i < _indexer.numDocs(); ++i) {
-          //score and store each document.
-      //all.add(scoreDocument(query, i));
+
+      fourScoredDocument[0] = cos.runQuery_cos_sd(query,i);
+      fourScoredDocument[1] = ql.runQuery_ql_sd(query,i);
+      fourScoredDocument[2] = phrase.runQuery_phrase_sd(query,i);
+      fourScoredDocument[3] = numviews.runQuery_numviews_sd(query,i);
+      all.add(scoreDocument(query, i, fourScoredDocument, _betaArray));
     }
+      //sort the documents.
       Collections.sort(all, Collections.reverseOrder());
+
       Vector<ScoredDocument> results = new Vector<ScoredDocument>();
       for (int i = 0; i < all.size() && i < numResults; ++i) {
+
         results.add(all.get(i));
       }
 
       return results;
   }
 
-//  private ScoredDocument scoreDocument(Query query, int did){
-//    score =
-//  }
+ private ScoredDocument scoreDocument(Query query, int did, ScoredDocument[] fourScoredDocument,float[] _betaArray ){
+      query.processQuery();
+      Document doc = _indexer.getDoc(did);
+      return new ScoredDocument(query._query, doc, fourScoredDocument, _betaArray);
+ }
 
 
 }

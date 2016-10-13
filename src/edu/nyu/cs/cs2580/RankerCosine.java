@@ -10,7 +10,7 @@ import edu.nyu.cs.cs2580.SearchEngine.Options;
 
 /**
  * @CS2580: Use this template to implement the cosine ranker for HW1.
- * 
+ *
  * @author congyu
  * @author fdiaz
  */
@@ -37,7 +37,7 @@ public class RankerCosine extends Ranker {
   void getDocumentVector(int docid, Map<String, Double> docVector) {
     Document doc = _indexer.getDoc(docid);
     Vector<String> docTokens = ((DocumentFull) doc).getConvertedBodyTokens();
-    
+
     // Record tokens frequency in document body
     for (String token : docTokens) {
       if (docVector.containsKey(token)) {
@@ -45,7 +45,7 @@ public class RankerCosine extends Ranker {
       } else {
         docVector.put(token, 1.0);
       }
-    } 
+    }
 
     // Compute tf-idf vector
     double normalizeFactor = 0.0;
@@ -58,9 +58,9 @@ public class RankerCosine extends Ranker {
     normalizeFactor = Math.sqrt(normalizeFactor);
 
     //L2-Normalize
-    for (Map.Entry<String, Double> entry : docVector.entrySet()) {      
-      entry.setValue(entry.getValue() / normalizeFactor);      
-    }    
+    for (Map.Entry<String, Double> entry : docVector.entrySet()) {
+      entry.setValue(entry.getValue() / normalizeFactor);
+    }
   }
 
   @Override
@@ -91,10 +91,22 @@ public class RankerCosine extends Ranker {
     return results;
   }
 
+  //helper mthod for cos ranker to do single document query
+  public ScoredDocument runQuery_cos_sd(Query query, int indexNumber){
+    Map<String, Double> docVector = _docVectorSet.get(indexNumber);
+    double score = 0.0;
+    for(String queryToken : query._tokens){
+      if (docVector.containsKey(queryToken)){
+        score += docVector.get(queryToken) * 1.0;
+      }
+    }
+    return new ScoredDocument(query._query, _indexer.getDoc(indexNumber), score);
+  }
+
   private double getTermIDF(String term) {
     int totalNum = _indexer.numDocs();
     int containTermNum = _indexer.corpusDocFrequencyByTerm(term);
-    return Math.log((double)(totalNum) / (double)(containTermNum)); 
+    return Math.log((double)(totalNum) / (double)(containTermNum));
   }
-  
+
 }

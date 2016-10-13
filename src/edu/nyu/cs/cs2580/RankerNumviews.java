@@ -36,6 +36,11 @@ public class RankerNumviews extends Ranker {
     }
     return results;
   }
+
+  //helper mthod for phrase ranker to do single document query
+  public ScoredDocument runQuery_numviews_sd(Query query, int indexNumber){
+    return scoreDocument(query, indexNumber);
+  }
   //returns the number of times the document was viewed in the last hour procvided as part of corpus.
   private ScoredDocument scoreDocument(Query query, int did) {
     // Process the raw query into tokens.
@@ -52,4 +57,3 @@ public class RankerNumviews extends Ranker {
   }
 
   }
-
