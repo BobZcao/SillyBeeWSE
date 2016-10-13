@@ -181,10 +181,11 @@ class Evaluator {
   }
 }
   
-  public static void evaluateQueryMetric4(
+  public static String evaluateQueryMetric4(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
 
+    StringBuilder sb = new StringBuilder();
     // Average Precision, iterate through all document
     DocumentRelevances relevances = judgments.get(query);
     double averagePrecision = 0.0;
@@ -205,21 +206,27 @@ class Evaluator {
       }
 
       if (R == 0.0) {
-        System.out.println(query + "\tAverage precision\t there is no relevant document in labels.");
+        String res = query + "\tAverage precision\t there is no relevant document in labels.";
+        sb.append(res+"\n");
+        System.out.println(res);
         averagePrecision = 0.0;
       } else {
         averagePrecision /= R;
-        System.out.println(query + "\tAverage precision\t" + Double.toString(averagePrecision));
+        String res = query + "\tAverage precision\t" + Double.toString(averagePrecision);
+        sb.append(res+"\n");
+        System.out.println(res);
       }
     }
+    return sb.toString();
 
 }
     
 
-  public static void evaluateQueryMetric3(
+  public static String evaluateQueryMetric3(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
-    
+
+    StringBuilder sb = new StringBuilder();
     DocumentRelevances relevances = judgments.get(query);
     TreeMap<Double, Double> recall_precision = new TreeMap<Double, Double>();
     double R = 0.0;
@@ -269,19 +276,24 @@ class Evaluator {
             }
             precision_stdcell = leftSlotPrecision > rightSlotPrecision ? leftSlotPrecision : rightSlotPrecision;
           } 
-          
-          System.out.println(query + "\tPrecision@Recall@" + Double.toString(r) + "\t" + precision_stdcell);
+
+          String res = query + "\tPrecision@Recall@" + Double.toString(r) + "\t" + precision_stdcell;
+          sb.append(res+"\n");
+          System.out.println(res);
           
         }
+
       }
     }
+    return sb.toString();
 
   }
 
-  public static void evaluateQueryMetric2(
+  public static String evaluateQueryMetric2(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
 
+    StringBuilder sb = new StringBuilder();
     // F-0.5 Measure 
     double alpha = 0.5;
     int[] K = {1, 5, 10};
@@ -295,15 +307,20 @@ class Evaluator {
       for( int k : K) {
         double R = getKRelevanceDocInResult(query, docids, judgments, k);
         if(releventDocNum == 0.0){
-            System.err.println(query + "\tF0.5@" + Integer.toString(k) 
-              + "\tThere is no relevant document in labels.");
+          String res = query + "\tF0.5@" + Integer.toString(k)
+                  + "\tThere is no relevant document in labels.";
+          sb.append(res+"\n");
+          System.err.println(res);
         }
         else {
-            double FMeasure = evaluateFMeasure(R / (double)k, R / releventDocNum, alpha);
-            System.out.println(query + "\tF0.5@" + Integer.toString(k)+ "\t" + Double.toString(FMeasure));
+          double FMeasure = evaluateFMeasure(R / (double)k, R / releventDocNum, alpha);
+          String res = query + "\tF0.5@" + Integer.toString(k)+ "\t" + Double.toString(FMeasure);
+          sb.append(res+"\n");
+          System.out.println(res);
         }
       }
     }
+    return sb.toString();
 
   }
 
@@ -331,10 +348,11 @@ class Evaluator {
     return R;
   }
 
-  public static void evaluateQueryMetric1(
+  public static String evaluateQueryMetric1(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
 
+    StringBuilder sb = new StringBuilder();
     // Recall at 1, 5, 10
     int[] K = {1, 5, 10};
     DocumentRelevances relevances = judgments.get(query);
@@ -346,29 +364,36 @@ class Evaluator {
       for (int k : K){
         double R = getKRelevanceDocInResult(query, docids, judgments, k);
         if(releventDocNum == 0.0){
-          System.err.println(query + "\tRecall@" + Integer.toString(k) 
-            + "\tThere is no relevant document in labels.");
+          String res = query + "\tRecall@" + Integer.toString(k) + "\tThere is no relevant document in labels.";
+          sb.append(res+"\n");
+          System.err.println(res);
         }
         else {
-          System.out.println(query + "\tRecall@" + Integer.toString(k)
-            + "\t" + Double.toString(R / releventDocNum));
+          String res = query + "\tRecall@" + Integer.toString(k) + "\t" + Double.toString(R / releventDocNum);
+          sb.append(res+'\n');
+          System.out.println(res);
         }
       }
     }
+    return sb.toString();
   }
   
-  public static void evaluateQueryMetric0(
+  public static String evaluateQueryMetric0(
       String query, List<Integer> docids,
       Map<String, DocumentRelevances> judgments) {
 
+    StringBuilder sb = new StringBuilder();
     // Precision at 1, 5, 10
     int[] K = {1, 5, 10};
 
     for (int k : K) {
       double R = getKRelevanceDocInResult(query, docids, judgments, k);
-      System.out.println(query + "\tPrecision@" + Integer.toString(k)
-        + "\t" + Double.toString(R / (double)k));
+      String res = query + "\tPrecision@" + Integer.toString(k) + "\t" + Double.toString(R / (double)k);
+      sb.append(res+"\n");
+      System.out.println(res);
     }
+
+    return sb.toString();
   }
 
   public static void evaluateQueryInstructor(
@@ -391,34 +416,40 @@ class Evaluator {
     System.out.println(query + "\t" + Double.toString(R / N));
   }
 
-  public static void evaluateQueryMetric6( String query, List<Integer> docids,
+  public static String evaluateQueryMetric6( String query, List<Integer> docids,
                                            Map<String, DocumentRelevances> judgements){
 
+    StringBuilder sb = new StringBuilder();
     DocumentRelevances relevances = judgements.get(query);
     if(relevances == null){
       System.out.println("Query [" + query + "] not found!");
-      return ;
+      return "";
     }
     for (int i=0; i<docids.size(); i++){
       Integer id = docids.get(i);
       if(relevances.hasRelevanceForDoc(id) && relevances.getRelevanceForDoc(id)>0){
         Double result = 1.0/Double.valueOf(i+1);
-        System.out.println(query + "\tReciprocal rank\t" + Double.toString(result));
-        return ;
+        String res = query + "\tReciprocal rank\t" + Double.toString(result);
+        sb.append(res);
+        sb.append("\n");
+        System.out.println(res);
+        break;
       }
     }
+    return sb.toString();
 
   }
 
-  public static void evaluateQueryMetric5(String query, List<Integer> docids,
+  public static String evaluateQueryMetric5(String query, List<Integer> docids,
                                           Map<String, DocumentRelevances> judgements){
 
     int[] K = {1, 5 ,10};
     DocumentRelevances relevances = judgements.get(query);
+    StringBuilder sb = new StringBuilder();
 
     if(relevances == null){
       System.out.println("Query [" + query + "] not found!");
-      return ;
+      return "";
     }
     for(int k: K) {
       Double score = 0.0;
@@ -433,8 +464,13 @@ class Evaluator {
           continue;
         }
       }
-      System.out.println(query + "\tNDCG@" + Integer.toString(k) + "\t" + Double.toString(score));
+      String res = query + "\tNDCG@" + Integer.toString(k) + "\t" + Double.toString(score);
+      sb.append(res);
+      sb.append("\n");
+      System.out.println(res);
     }
+
+    return sb.toString();
 
 
   }

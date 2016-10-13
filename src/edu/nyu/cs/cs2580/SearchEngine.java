@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -64,7 +66,7 @@ public class SearchEngine {
     
     /**
      * Constructor for options.
-     * @param optionFile where all the options must reside
+     * @param \optionFile where all the options must reside
      * @throws IOException
      */
     public Options(String optionsFile) throws IOException {
@@ -222,18 +224,23 @@ public class SearchEngine {
         Check(ranker != null,
               "Ranker " + rankerType + " is not valid!");
         if(typeToString(rankerType) == "")System.out.println(rankerType);
-        String fileName = "hw1.1-" + typeToString(rankerType) + ".tsv";
-        processQueryForRanker(ranker, indexer.numDocs(), fileName);
+        String fileName1 = "hw1.1-" + typeToString(rankerType) + ".tsv";
+        String fileName2 = "hw1.3-" + typeToString(rankerType) + ".tsv";
+        processQueryForRanker(ranker, indexer.numDocs(), fileName1, fileName2);
       }
     }
   }
 
-  private static void processQueryForRanker(Ranker ranker, int numResults, String fileName) throws IOException {
+  private static void processQueryForRanker(Ranker ranker, int numResults, String fileName1,
+                                            String fileName2) throws IOException {
+
     String queryFile = "data/queries.tsv";
-    String resultFile = "data/" + fileName;
+    String resultFile1 = "data/" + fileName1;
+    String resultFile2 = "data/" + fileName2;
     String line = null;
     BufferedReader reader = new BufferedReader(new FileReader(queryFile));
-    BufferedWriter writer = new BufferedWriter(new FileWriter(resultFile));
+    BufferedWriter writer1 = new BufferedWriter(new FileWriter(resultFile1));
+    BufferedWriter writer2 = new BufferedWriter(new FileWriter(resultFile2));
     while ((line = reader.readLine()) != null) {
        // Processing the query.
       Query processedQuery = new Query(line);
@@ -242,13 +249,41 @@ public class SearchEngine {
       // Ranking.
       Vector<ScoredDocument> scoredDocs =
           ranker.runQuery(processedQuery, numResults);
+
+      // put ranking results into docids
+      List<Integer> docids = new ArrayList<>();
+      for(ScoredDocument sd : scoredDocs){
+        docids.add( sd.getDocID());
+      }
+
+      Evaluator evaluator = new Evaluator();
+      Map<String, Evaluator.DocumentRelevances> judgments =
+              new HashMap<String, Evaluator.DocumentRelevances>();
+      evaluator.readRelevanceJudgments("data/labels.tsv", judgments);
+
+      //修改其他metrics的输出
+      //metrics tsv文件名
+      String evalRes0 = evaluator.evaluateQueryMetric0(processedQuery._query, docids, judgments );
+      System.out.println("evalRes0 is : \n" + evalRes0);
+
+      String evalRes1 = evaluator.evaluateQueryMetric1(processedQuery._query, docids, judgments );
+      String evalRes2 = evaluator.evaluateQueryMetric2(processedQuery._query, docids, judgments );
+      String evalRes3 = evaluator.evaluateQueryMetric3(processedQuery._query, docids, judgments );
+      String evalRes4 = evaluator.evaluateQueryMetric4(processedQuery._query, docids, judgments );
+      String evalRes5 = evaluator.evaluateQueryMetric5(processedQuery._query, docids, judgments );
+      String evalRes6 = evaluator.evaluateQueryMetric6(processedQuery._query, docids, judgments );
+
+      writer2.write(evalRes0+evalRes1+evalRes2+evalRes3+evalRes4+evalRes5+evalRes6);
+
+      // write scoredDocs into corresponding file (1.1)
       for (ScoredDocument doc : scoredDocs) {
-        writer.write(doc.asTextResult());
-        writer.write("\n");
+        writer1.write(doc.asTextResult());
+        writer1.write("\n");
       }
     }
     reader.close();
-    writer.close();
+    writer1.close();
+    writer2.close();
   }
 
   

@@ -11,6 +11,10 @@ class ScoredDocument implements Comparable<ScoredDocument> {
   private Document _doc;
   private double _score;
 
+  public Integer getDocID(){
+    return _doc._docid;
+  }
+
   public ScoredDocument(String query, Document doc, double score) {
     _query = query;
     _doc = doc;
