@@ -224,7 +224,13 @@ public class SearchEngine {
         Check(ranker != null,
               "Ranker " + rankerType + " is not valid!");
         if(typeToString(rankerType) == "")System.out.println(rankerType);
-        String fileName1 = "hw1.1-" + typeToString(rankerType) + ".tsv";
+        String fileName1;
+        if(rankerType == QueryHandler.CgiArguments.RankerType.LINEAR) {
+          fileName1 = "hw1.2-" + typeToString(rankerType) + ".tsv";
+        } else {
+          fileName1 = "hw1.1-" + typeToString(rankerType) + ".tsv";
+        }
+        //add 1.2 linear
         String fileName2 = "hw1.3-" + typeToString(rankerType) + ".tsv";
         processQueryForRanker(ranker, indexer.numDocs(), fileName1, fileName2);
       }

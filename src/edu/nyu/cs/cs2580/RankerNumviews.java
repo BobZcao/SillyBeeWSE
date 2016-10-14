@@ -44,7 +44,7 @@ public class RankerNumviews extends Ranker {
   //returns the number of times the document was viewed in the last hour procvided as part of corpus.
   private ScoredDocument scoreDocument(Query query, int did) {
     // Process the raw query into tokens.
-    query.processQuery();
+//    query.processQuery();
 
     // Get the document tokens.
     Document doc = _indexer.getDoc(did);

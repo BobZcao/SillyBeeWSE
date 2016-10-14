@@ -75,7 +75,7 @@ public class RankerLinear extends Ranker {
   }
 
  private ScoredDocument scoreDocument(Query query, int did, ScoredDocument[] fourScoredDocument,float[] _betaArray ){
-      query.processQuery();
+//      query.processQuery();
       Document doc = _indexer.getDoc(did);
       return new ScoredDocument(query._query, doc, fourScoredDocument, _betaArray);
  }
