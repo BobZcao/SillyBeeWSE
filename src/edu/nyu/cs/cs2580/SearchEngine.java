@@ -266,9 +266,7 @@ public class SearchEngine {
       Map<String, Evaluator.DocumentRelevances> judgments =
               new HashMap<String, Evaluator.DocumentRelevances>();
       evaluator.readRelevanceJudgments("data/labels.tsv", judgments);
-
-      //修改其他metrics的输出
-      //metrics tsv文件名
+      
       String evalRes0 = evaluator.evaluateQueryMetric0(processedQuery._query, docids, judgments );
       System.out.println("evalRes0 is : \n" + evalRes0);
 
