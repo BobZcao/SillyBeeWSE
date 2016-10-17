@@ -268,7 +268,7 @@ public class SearchEngine {
       evaluator.readRelevanceJudgments("data/labels.tsv", judgments);
       
       String evalRes0 = evaluator.evaluateQueryMetric0(processedQuery._query, docids, judgments );
-      System.out.println("evalRes0 is : \n" + evalRes0);
+      //System.out.println("evalRes0 is : \n" + evalRes0);
 
       String evalRes1 = evaluator.evaluateQueryMetric1(processedQuery._query, docids, judgments );
       String evalRes2 = evaluator.evaluateQueryMetric2(processedQuery._query, docids, judgments );
